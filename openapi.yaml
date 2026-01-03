@@ -1,10 +1,10 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Hello World GPT App
   version: 1.0.0
   description: A simple Hello World application for GPT App Store
 servers:
-  - url: https://YOUR_APP_URL.vercel.app
+  - url: https://app-simple-teal.vercel.app
     description: Production server
 paths:
   /api/hello:
