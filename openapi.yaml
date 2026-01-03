@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Hello World GPT App
+  version: 1.0.0
+  description: A simple Hello World application for GPT App Store
+servers:
+  - url: https://YOUR_APP_URL.vercel.app
+    description: Production server
+paths:
+  /api/hello:
+    post:
+      operationId: sayHello
+      summary: Say hello world
+      description: Returns a personalized hello world message
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Optional name to personalize the greeting
+                  example: "John"
+      responses:
+        '200':
+          description: Success response with greeting message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The greeting message
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check endpoint
+      description: Check if the API is running
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  timestamp:
+                    type: string
+
