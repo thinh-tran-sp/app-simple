@@ -94,7 +94,7 @@ app.post('/mcp', (req, res) => {
         if (!method) {
             return res.status(400).json({
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 error: {
                     code: -32600,
                     message: 'Invalid Request: method is required'
@@ -105,7 +105,7 @@ app.post('/mcp', (req, res) => {
         if (method === 'initialize') {
             const response = {
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 result: {
                     protocolVersion: '2025-11-25',
                     capabilities: {
@@ -124,7 +124,7 @@ app.post('/mcp', (req, res) => {
         } else if (method === 'tools/list') {
             const response = {
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 result: {
                     tools: [
                         {
@@ -156,7 +156,7 @@ app.post('/mcp', (req, res) => {
                 
                 return res.json({
                     jsonrpc: '2.0',
-                    id: id || null,
+                    id: id !== undefined ? id : null,
                     result: {
                         content: [
                             {
@@ -169,7 +169,7 @@ app.post('/mcp', (req, res) => {
             } else {
                 return res.json({
                     jsonrpc: '2.0',
-                    id: id || null,
+                    id: id !== undefined ? id : null,
                     error: {
                         code: -32601,
                         message: `Tool not found: ${name}`
@@ -179,7 +179,7 @@ app.post('/mcp', (req, res) => {
         } else {
             return res.json({
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 error: {
                     code: -32601,
                     message: `Method not found: ${method}`
@@ -188,9 +188,10 @@ app.post('/mcp', (req, res) => {
         }
     } catch (error) {
         console.error('MCP endpoint error:', error);
+        const errorId = req.body?.id !== undefined ? req.body.id : null;
         res.status(500).json({
             jsonrpc: '2.0',
-            id: req.body?.id || null,
+            id: errorId,
             error: {
                 code: -32603,
                 message: 'Internal error',
@@ -212,7 +213,7 @@ app.post('/', (req, res) => {
         if (method === 'initialize') {
             const response = {
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 result: {
                     protocolVersion: '2025-11-25',
                     capabilities: {
@@ -231,7 +232,7 @@ app.post('/', (req, res) => {
         } else if (method === 'tools/list') {
             const response = {
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 result: {
                     tools: [
                         {
@@ -263,7 +264,7 @@ app.post('/', (req, res) => {
                 
                 return res.json({
                     jsonrpc: '2.0',
-                    id: id || null,
+                    id: id !== undefined ? id : null,
                     result: {
                         content: [
                             {
@@ -276,7 +277,7 @@ app.post('/', (req, res) => {
             } else {
                 return res.json({
                     jsonrpc: '2.0',
-                    id: id || null,
+                    id: id !== undefined ? id : null,
                     error: {
                         code: -32601,
                         message: `Tool not found: ${name}`
@@ -286,7 +287,7 @@ app.post('/', (req, res) => {
         } else {
             return res.json({
                 jsonrpc: '2.0',
-                id: id || null,
+                id: id !== undefined ? id : null,
                 error: {
                     code: -32601,
                     message: `Method not found: ${method}`
