@@ -43,6 +43,11 @@ app.get('/privacy.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
 });
 
+// OpenAI domain verification endpoint
+app.get('/.well-known/openai-apps-challenge', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', '.well-known', 'openai-apps-challenge'));
+});
+
 // API info endpoint
 app.get('/api', (req, res) => {
     res.json({ 
