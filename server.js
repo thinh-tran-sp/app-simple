@@ -30,7 +30,23 @@ app.get('/health', (req, res) => {
     });
 });
 
-// MCP Server endpoint
+// MCP Server endpoint - GET handler for info
+app.get('/mcp', (req, res) => {
+    res.json({
+        service: 'MCP Server',
+        protocol: 'JSON-RPC 2.0',
+        methods: ['initialize', 'tools/list', 'tools/call'],
+        tools: [
+            {
+                name: 'sayHello',
+                description: 'Say hello world with optional name'
+            }
+        ],
+        note: 'This endpoint accepts POST requests only. Use POST method with JSON-RPC format.'
+    });
+});
+
+// MCP Server endpoint - POST handler
 app.post('/mcp', (req, res) => {
     const { method, params, id } = req.body;
     
