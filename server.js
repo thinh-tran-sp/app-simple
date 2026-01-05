@@ -30,6 +30,76 @@ app.get('/health', (req, res) => {
     });
 });
 
+// MCP Server endpoint - List tools
+app.post('/mcp', (req, res) => {
+    // MCP Protocol uses JSON-RPC format
+    const { method, params } = req.body;
+    
+    if (method === 'tools/list') {
+        res.json({
+            jsonrpc: '2.0',
+            id: req.body.id || null,
+            result: {
+                tools: [
+                    {
+                        name: 'sayHello',
+                        description: 'Say hello world with optional name',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                name: {
+                                    type: 'string',
+                                    description: 'Optional name to personalize the greeting'
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        });
+    } else if (method === 'tools/call') {
+        // Handle tool call
+        const { name, arguments: args } = params || {};
+        
+        if (name === 'sayHello') {
+            const message = args?.name 
+                ? `Hello, ${args.name}! 👋 Welcome to GPT App Store!`
+                : 'Hello World! 👋 Welcome to GPT App Store!';
+            
+            res.json({
+                jsonrpc: '2.0',
+                id: req.body.id || null,
+                result: {
+                    content: [
+                        {
+                            type: 'text',
+                            text: message
+                        }
+                    ]
+                }
+            });
+        } else {
+            res.json({
+                jsonrpc: '2.0',
+                id: req.body.id || null,
+                error: {
+                    code: -32601,
+                    message: 'Method not found'
+                }
+            });
+        }
+    } else {
+        res.json({
+            jsonrpc: '2.0',
+            id: req.body.id || null,
+            error: {
+                code: -32601,
+                message: 'Method not found'
+            }
+        });
+    }
+});
+
 // Serve static files from public directory (after API routes)
 app.use(express.static('public'));
 
