@@ -103,20 +103,24 @@ app.post('/mcp', (req, res) => {
         }
         
         if (method === 'initialize') {
-            res.json({
+            const response = {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
                     protocolVersion: '2025-11-25',
                     capabilities: {
-                        tools: {}
+                        tools: {
+                            listChanged: true
+                        }
                     },
                     serverInfo: {
                         name: 'hello-world-gpt-app',
                         version: '1.0.0'
                     }
                 }
-            });
+            };
+            console.log('Initialize response:', JSON.stringify(response, null, 2));
+            res.json(response);
         } else if (method === 'tools/list') {
             res.json({
                 jsonrpc: '2.0',
@@ -204,20 +208,24 @@ app.post('/', (req, res) => {
         const { params, id } = req.body || {};
         
         if (method === 'initialize') {
-            return res.json({
+            const response = {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
                     protocolVersion: '2025-11-25',
                     capabilities: {
-                        tools: {}
+                        tools: {
+                            listChanged: true
+                        }
                     },
                     serverInfo: {
                         name: 'hello-world-gpt-app',
                         version: '1.0.0'
                     }
                 }
-            });
+            };
+            console.log('Initialize response (root):', JSON.stringify(response, null, 2));
+            return res.json(response);
         } else if (method === 'tools/list') {
             return res.json({
                 jsonrpc: '2.0',
