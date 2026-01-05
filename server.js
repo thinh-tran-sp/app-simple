@@ -120,9 +120,9 @@ app.post('/mcp', (req, res) => {
                 }
             };
             console.log('Initialize response:', JSON.stringify(response, null, 2));
-            res.json(response);
+            return res.json(response);
         } else if (method === 'tools/list') {
-            res.json({
+            const response = {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
@@ -143,7 +143,9 @@ app.post('/mcp', (req, res) => {
                         }
                     ]
                 }
-            });
+            };
+            console.log('Tools/list response:', JSON.stringify(response, null, 2));
+            return res.json(response);
         } else if (method === 'tools/call') {
             const { name, arguments: args } = params || {};
             
@@ -152,7 +154,7 @@ app.post('/mcp', (req, res) => {
                     ? `Hello, ${args.name}! 👋 Welcome to GPT App Store!`
                     : 'Hello World! 👋 Welcome to GPT App Store!';
                 
-                res.json({
+                return res.json({
                     jsonrpc: '2.0',
                     id: id || null,
                     result: {
@@ -165,7 +167,7 @@ app.post('/mcp', (req, res) => {
                     }
                 });
             } else {
-                res.json({
+                return res.json({
                     jsonrpc: '2.0',
                     id: id || null,
                     error: {
@@ -175,7 +177,7 @@ app.post('/mcp', (req, res) => {
                 });
             }
         } else {
-            res.json({
+            return res.json({
                 jsonrpc: '2.0',
                 id: id || null,
                 error: {
@@ -227,7 +229,7 @@ app.post('/', (req, res) => {
             console.log('Initialize response (root):', JSON.stringify(response, null, 2));
             return res.json(response);
         } else if (method === 'tools/list') {
-            return res.json({
+            const response = {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
@@ -248,7 +250,9 @@ app.post('/', (req, res) => {
                         }
                     ]
                 }
-            });
+            };
+            console.log('Tools/list response (root):', JSON.stringify(response, null, 2));
+            return res.json(response);
         } else if (method === 'tools/call') {
             const { name, arguments: args } = params || {};
             
@@ -269,7 +273,25 @@ app.post('/', (req, res) => {
                         ]
                     }
                 });
+            } else {
+                return res.json({
+                    jsonrpc: '2.0',
+                    id: id || null,
+                    error: {
+                        code: -32601,
+                        message: `Tool not found: ${name}`
+                    }
+                });
             }
+        } else {
+            return res.json({
+                jsonrpc: '2.0',
+                id: id || null,
+                error: {
+                    code: -32601,
+                    message: `Method not found: ${method}`
+                }
+            });
         }
     }
     
