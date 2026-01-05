@@ -107,7 +107,7 @@ app.post('/mcp', (req, res) => {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
-                    protocolVersion: '2024-11-05',
+                    protocolVersion: '2025-11-25',
                     capabilities: {
                         tools: {}
                     },
@@ -208,7 +208,7 @@ app.post('/', (req, res) => {
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
-                    protocolVersion: '2024-11-05',
+                    protocolVersion: '2025-11-25',
                     capabilities: {
                         tools: {}
                     },
