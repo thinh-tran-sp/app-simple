@@ -30,15 +30,29 @@ app.get('/health', (req, res) => {
     });
 });
 
-// MCP Server endpoint - List tools
+// MCP Server endpoint
 app.post('/mcp', (req, res) => {
-    // MCP Protocol uses JSON-RPC format
-    const { method, params } = req.body;
+    const { method, params, id } = req.body;
     
-    if (method === 'tools/list') {
+    if (method === 'initialize') {
         res.json({
             jsonrpc: '2.0',
-            id: req.body.id || null,
+            id: id || null,
+            result: {
+                protocolVersion: '2024-11-05',
+                capabilities: {
+                    tools: {}
+                },
+                serverInfo: {
+                    name: 'hello-world-gpt-app',
+                    version: '1.0.0'
+                }
+            }
+        });
+    } else if (method === 'tools/list') {
+        res.json({
+            jsonrpc: '2.0',
+            id: id || null,
             result: {
                 tools: [
                     {
@@ -58,7 +72,6 @@ app.post('/mcp', (req, res) => {
             }
         });
     } else if (method === 'tools/call') {
-        // Handle tool call
         const { name, arguments: args } = params || {};
         
         if (name === 'sayHello') {
@@ -68,7 +81,7 @@ app.post('/mcp', (req, res) => {
             
             res.json({
                 jsonrpc: '2.0',
-                id: req.body.id || null,
+                id: id || null,
                 result: {
                     content: [
                         {
@@ -81,7 +94,7 @@ app.post('/mcp', (req, res) => {
         } else {
             res.json({
                 jsonrpc: '2.0',
-                id: req.body.id || null,
+                id: id || null,
                 error: {
                     code: -32601,
                     message: 'Method not found'
@@ -91,10 +104,10 @@ app.post('/mcp', (req, res) => {
     } else {
         res.json({
             jsonrpc: '2.0',
-            id: req.body.id || null,
+            id: id || null,
             error: {
                 code: -32601,
-                message: 'Method not found'
+                message: `Method not found: ${method}`
             }
         });
     }
