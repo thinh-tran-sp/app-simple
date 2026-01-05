@@ -3,8 +3,23 @@ const cors = require('cors');
 const path = require('path');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Logging middleware for debugging
+app.use((req, res, next) => {
+    if (req.path === '/mcp' || req.path === '/') {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, {
+            headers: req.headers,
+            body: req.body
+        });
+    }
+    next();
+});
 
 // Hello World endpoint
 app.post('/api/hello', (req, res) => {
@@ -48,85 +63,183 @@ app.get('/mcp', (req, res) => {
 
 // MCP Server endpoint - POST handler
 app.post('/mcp', (req, res) => {
-    const { method, params, id } = req.body;
-    
-    if (method === 'initialize') {
-        res.json({
-            jsonrpc: '2.0',
-            id: id || null,
-            result: {
-                protocolVersion: '2024-11-05',
-                capabilities: {
-                    tools: {}
-                },
-                serverInfo: {
-                    name: 'hello-world-gpt-app',
-                    version: '1.0.0'
-                }
-            }
-        });
-    } else if (method === 'tools/list') {
-        res.json({
-            jsonrpc: '2.0',
-            id: id || null,
-            result: {
-                tools: [
-                    {
-                        name: 'sayHello',
-                        description: 'Say hello world with optional name',
-                        inputSchema: {
-                            type: 'object',
-                            properties: {
-                                name: {
-                                    type: 'string',
-                                    description: 'Optional name to personalize the greeting'
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        });
-    } else if (method === 'tools/call') {
-        const { name, arguments: args } = params || {};
+    try {
+        const { method, params, id } = req.body || {};
         
-        if (name === 'sayHello') {
-            const message = args?.name 
-                ? `Hello, ${args.name}! 👋 Welcome to GPT App Store!`
-                : 'Hello World! 👋 Welcome to GPT App Store!';
-            
+        if (!method) {
+            return res.status(400).json({
+                jsonrpc: '2.0',
+                id: id || null,
+                error: {
+                    code: -32600,
+                    message: 'Invalid Request: method is required'
+                }
+            });
+        }
+        
+        if (method === 'initialize') {
             res.json({
                 jsonrpc: '2.0',
                 id: id || null,
                 result: {
-                    content: [
+                    protocolVersion: '2024-11-05',
+                    capabilities: {
+                        tools: {}
+                    },
+                    serverInfo: {
+                        name: 'hello-world-gpt-app',
+                        version: '1.0.0'
+                    }
+                }
+            });
+        } else if (method === 'tools/list') {
+            res.json({
+                jsonrpc: '2.0',
+                id: id || null,
+                result: {
+                    tools: [
                         {
-                            type: 'text',
-                            text: message
+                            name: 'sayHello',
+                            description: 'Say hello world with optional name',
+                            inputSchema: {
+                                type: 'object',
+                                properties: {
+                                    name: {
+                                        type: 'string',
+                                        description: 'Optional name to personalize the greeting'
+                                    }
+                                }
+                            }
                         }
                     ]
                 }
             });
+        } else if (method === 'tools/call') {
+            const { name, arguments: args } = params || {};
+            
+            if (name === 'sayHello') {
+                const message = args?.name 
+                    ? `Hello, ${args.name}! 👋 Welcome to GPT App Store!`
+                    : 'Hello World! 👋 Welcome to GPT App Store!';
+                
+                res.json({
+                    jsonrpc: '2.0',
+                    id: id || null,
+                    result: {
+                        content: [
+                            {
+                                type: 'text',
+                                text: message
+                            }
+                        ]
+                    }
+                });
+            } else {
+                res.json({
+                    jsonrpc: '2.0',
+                    id: id || null,
+                    error: {
+                        code: -32601,
+                        message: `Tool not found: ${name}`
+                    }
+                });
+            }
         } else {
             res.json({
                 jsonrpc: '2.0',
                 id: id || null,
                 error: {
                     code: -32601,
-                    message: 'Method not found'
+                    message: `Method not found: ${method}`
                 }
             });
         }
-    } else {
-        res.json({
+    } catch (error) {
+        console.error('MCP endpoint error:', error);
+        res.status(500).json({
             jsonrpc: '2.0',
-            id: id || null,
+            id: req.body?.id || null,
             error: {
-                code: -32601,
-                message: `Method not found: ${method}`
+                code: -32603,
+                message: 'Internal error',
+                data: error.message
             }
         });
     }
+});
+
+// Also handle MCP at root level (in case OpenAI sends to root)
+app.post('/', (req, res) => {
+    const { method } = req.body || {};
+    
+    // Only handle MCP requests at root - reuse the same logic
+    if (method && (method === 'initialize' || method === 'tools/list' || method === 'tools/call')) {
+        // Call the /mcp handler logic directly
+        const { params, id } = req.body || {};
+        
+        if (method === 'initialize') {
+            return res.json({
+                jsonrpc: '2.0',
+                id: id || null,
+                result: {
+                    protocolVersion: '2024-11-05',
+                    capabilities: {
+                        tools: {}
+                    },
+                    serverInfo: {
+                        name: 'hello-world-gpt-app',
+                        version: '1.0.0'
+                    }
+                }
+            });
+        } else if (method === 'tools/list') {
+            return res.json({
+                jsonrpc: '2.0',
+                id: id || null,
+                result: {
+                    tools: [
+                        {
+                            name: 'sayHello',
+                            description: 'Say hello world with optional name',
+                            inputSchema: {
+                                type: 'object',
+                                properties: {
+                                    name: {
+                                        type: 'string',
+                                        description: 'Optional name to personalize the greeting'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            });
+        } else if (method === 'tools/call') {
+            const { name, arguments: args } = params || {};
+            
+            if (name === 'sayHello') {
+                const message = args?.name 
+                    ? `Hello, ${args.name}! 👋 Welcome to GPT App Store!`
+                    : 'Hello World! 👋 Welcome to GPT App Store!';
+                
+                return res.json({
+                    jsonrpc: '2.0',
+                    id: id || null,
+                    result: {
+                        content: [
+                            {
+                                type: 'text',
+                                text: message
+                            }
+                        ]
+                    }
+                });
+            }
+        }
+    }
+    
+    // Otherwise, serve the HTML page
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Serve static files from public directory (after API routes)
