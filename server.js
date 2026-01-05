@@ -53,19 +53,32 @@ app.options('/mcp', (req, res) => {
     res.sendStatus(200);
 });
 
-// MCP Server endpoint - GET handler for info
+// MCP Server endpoint - GET handler for info/discovery
 app.get('/mcp', (req, res) => {
+    // Set CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Content-Type', 'application/json');
+    
+    // Return tools in format that OpenAI Platform might expect
     res.json({
-        service: 'MCP Server',
-        protocol: 'JSON-RPC 2.0',
-        methods: ['initialize', 'tools/list', 'tools/call'],
         tools: [
             {
                 name: 'sayHello',
-                description: 'Say hello world with optional name'
+                description: 'Say hello world with optional name',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'Optional name to personalize the greeting'
+                        }
+                    },
+                    required: []
+                }
             }
         ],
-        note: 'This endpoint accepts POST requests only. Use POST method with JSON-RPC format.'
+        protocol: 'JSON-RPC 2.0',
+        methods: ['initialize', 'tools/list', 'tools/call']
     });
 });
 
