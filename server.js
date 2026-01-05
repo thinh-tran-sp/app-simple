@@ -38,6 +38,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Privacy Policy endpoint
+app.get('/privacy.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
 // API info endpoint
 app.get('/api', (req, res) => {
     res.json({ 
