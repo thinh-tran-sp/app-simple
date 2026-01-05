@@ -45,6 +45,14 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Handle OPTIONS for CORS preflight
+app.options('/mcp', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.sendStatus(200);
+});
+
 // MCP Server endpoint - GET handler for info
 app.get('/mcp', (req, res) => {
     res.json({
@@ -64,6 +72,10 @@ app.get('/mcp', (req, res) => {
 // MCP Server endpoint - POST handler
 app.post('/mcp', (req, res) => {
     try {
+        // Set CORS headers
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Content-Type', 'application/json');
+        
         const { method, params, id } = req.body || {};
         
         if (!method) {
@@ -108,7 +120,8 @@ app.post('/mcp', (req, res) => {
                                         type: 'string',
                                         description: 'Optional name to personalize the greeting'
                                     }
-                                }
+                                },
+                                required: []
                             }
                         }
                     ]
@@ -208,7 +221,8 @@ app.post('/', (req, res) => {
                                         type: 'string',
                                         description: 'Optional name to personalize the greeting'
                                     }
-                                }
+                                },
+                                required: []
                             }
                         }
                     ]
